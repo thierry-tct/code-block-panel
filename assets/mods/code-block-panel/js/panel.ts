@@ -2,6 +2,13 @@ import { default as params } from '@params';
 import snackbar from 'mods/snackbar/js/index.ts';
 import i18n from './i18n';
 
+const isTrue = (val: string | boolean): boolean => {
+    if (typeof val === 'boolean') {
+        return val
+    }
+    return val !== '' && val !== 'false' && val !== '0'
+}
+
 export default class Panel {
     private highlight: HTMLElement
 
@@ -15,11 +22,15 @@ export default class Panel {
     }
 
     init() {
-        if (!params.line_nos) {
+        const highlight = this.code.closest('.highlight')
+        if (!isTrue(highlight?.getAttribute('data-line-nos') ?? params.line_nos)) {
             this.code.classList.add('code-no-ln')
         }
-        if (params.wrap) {
+        if (isTrue(highlight?.getAttribute('data-wrap') ?? params.wrap)) {
             this.code.classList.add('code-wrap')
+        }
+        if (isTrue(highlight?.getAttribute('data-expand') ?? params.expand)) {
+            this.expand()
         }
 
         this.pre = this.code.parentElement as HTMLElement
@@ -47,7 +58,7 @@ export default class Panel {
         return Array.from(this.code.querySelectorAll(':scope > span'))
     }
 
-    private maxHeight
+    private maxHeight: string
 
     private maxLines() {
         const lines = this.lines()
